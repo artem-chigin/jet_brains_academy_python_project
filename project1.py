@@ -16,21 +16,23 @@ def is_num(value):
     return int_marker or float_marker or m_marker
 
 
-def input_validation(value):
-    num1, operator, num2 = value
+def input_validation():
+    print(msg_0)
+    calc = str(input()).split()
+    num1, operator, num2 = calc
     if not is_num(num1) or not is_num(num2):
         print(msg_1)
         print(msg_0)
-        return False
+        return input_validation()
     elif operator not in {"+", "-", "*", "/"}:
         print(msg_2)
         print(msg_0)
-        return False
+        return input_validation()
     elif operator == "/" and num2 == "0":
         print(msg_3)
         print(msg_0)
-        return False
-    return True
+        return input_validation()
+    return calc
 
 
 def operation(value, mem):
@@ -65,12 +67,7 @@ def branches(value):
 
 
 def program(value):
-    print(msg_0)
-    calc = str(input()).split()
-    while not input_validation(calc):
-        calc = str(input()).split()
-
-    result = operation(calc, value)
+    result = operation(input_validation(), value)
     print(result)
     memory = value
     if branches(msg_4):

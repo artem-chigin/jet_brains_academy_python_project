@@ -9,38 +9,37 @@ msg_5 = "Do you want to continue calculations? (y / n):"
 
 
 def is_num(value):
-    int_marker = value.isdigit()
-    float_marker = all(map(lambda num: True if num in string.digits
-                                               or (num == "." and value.count(".") == 1) else False, list(value)))
-    m_marker = value == "M"
-    return int_marker or float_marker or m_marker
+    if type(value) == int or type(value) == float:
+        return True
+    else:
+        int_marker = value.isdigit()
+        float_marker = all(map(lambda num: True if num in string.digits
+                                                or (num == "." and value.count(".") == 1) else False, list(value)))
+        m_marker = value == "M"
+        return int_marker or float_marker or m_marker
 
 
-def input_validation():
+def input_and_validation(mem):
     print(msg_0)
     calc = str(input()).split()
+    calc = list(map(lambda x: x if x != "M" else str(mem), calc))
     num1, operator, num2 = calc
+    print(num1, operator, num2)
+
     if not is_num(num1) or not is_num(num2):
         print(msg_1)
-        print(msg_0)
-        return input_validation()
+        return input_and_validation(mem)
     elif operator not in {"+", "-", "*", "/"}:
         print(msg_2)
-        print(msg_0)
-        return input_validation()
-    elif operator == "/" and num2 == "0":
+        return input_and_validation(mem)
+    elif operator == "/" and (num2 == "0" or num2 == "0.0"):
         print(msg_3)
-        print(msg_0)
-        return input_validation()
+        return input_and_validation(mem)
     return calc
 
 
-def operation(value, mem):
+def operation(value):
     num1, operator, num2 = value
-    if num1 == "M":
-        num1 = mem
-    if num2 == "M":
-        num2 = mem
 
     num1 = float(num1)
     num2 = float(num2)
@@ -66,14 +65,16 @@ def branches(value):
         branches(value)
 
 
-def program(value):
-    result = operation(input_validation(), value)
-    print(result)
-    memory = value
+def program(memory_value="0"):
+    result = operation(input_and_validation(memory_value))
+    print(result, type(result))
+
+    memory = memory_value
     if branches(msg_4):
-        memory = result
+        memory = str(result)
+        print(memory, type(memory))
     if branches(msg_5):
         program(memory)
 
-memory = 0
-program(memory)
+
+program()

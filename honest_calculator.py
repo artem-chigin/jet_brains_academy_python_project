@@ -10,6 +10,10 @@ msg_6 = " ... lazy"
 msg_7 = " ... very lazy"
 msg_8 = " ... very, very lazy"
 msg_9 = "You are"
+msg_10 = "Are you sure? It is only one digit! (y / n)"
+msg_11 = "Don't be silly! It's just one number! Add to the memory? (y / n)"
+msg_12 = "Last chance! Do you really want to embarrass yourself? (y / n)"
+msg_ = ["", msg_1, msg_2, msg_3, msg_4, msg_5, msg_6, msg_7, msg_8, msg_9, msg_10, msg_11, msg_12]
 
 
 def is_num(value):
@@ -93,15 +97,30 @@ def branches(value):
         branches(value)
 
 
+def memory(result_value, old_memory_value):
+    memory_value = str(result_value)
+    if is_one_digit(memory_value):
+        msg_index = 10
+        while msg_index <= 12:
+            if branches(msg_[msg_index]):
+                msg_index += 1
+            else:
+                return old_memory_value
+        return memory_value
+
+    else:
+        return memory_value
+
+
 def program(memory_value="0.0"):
     result = operation(input_and_validation(memory_value))
     print(result)
-    memory = memory_value
+    mem = memory_value
     if branches(msg_4):
-        memory = str(result)
+        mem = memory(str(result), mem)
         # print(memory)
     if branches(msg_5):
-        program(memory)
+        program(mem)
 
 
 program()

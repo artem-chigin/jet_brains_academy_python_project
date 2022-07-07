@@ -2,13 +2,17 @@ import os
 import argparse
 import hashlib
 
-
-def sort_direction():
-    print("""Size sorting options:
+msg_sort_direction = ("""Size sorting options:
 1. Descending
 2. Ascending
 
 Enter a sorting option:""")
+msg_duplicates = ("Check for duplicates?", "Wrong option")
+msg_delete_files = ("Delete files?", "Wrong option")
+
+
+def sort_direction():
+    print(msg_sort_direction)
     option = int(input())
     if option == 1:
         return True
@@ -21,9 +25,9 @@ Enter a sorting option:""")
 
 def calculate_hash(path_to_file_value):
     with open(path_to_file_value, "rb") as checked_file:
-        hash_value = hashlib.md5()
-        hash_value.update(checked_file.read())
-        return hash_value.hexdigest()
+        hash_val = hashlib.md5()
+        hash_val.update(checked_file.read())
+        return hash_val.hexdigest()
 
 
 # def print_result(value, *h):
@@ -34,15 +38,27 @@ def calculate_hash(path_to_file_value):
 #         print()
 
 
-def check_for_duplicates():
-    print("Check for duplicates?")
+def choose_yes_or_no(value1, value2, msg):
+    msg_intro, msg_outro = msg
+    print(msg_intro)
     answer = str(input())
-    if answer == "yes":
+    if answer == value1:
         return True
-    elif answer == "no":
+    elif answer == value2:
         return False
     else:
-        return check_for_duplicates()
+        print(msg_outro)
+        return choose_yes_or_no(value1, value2, msg)
+
+
+def delete_input_check():
+    print("Enter file numbers to delete:")
+    numbers_of_files = str(input()).split()
+    if any(map(lambda x: not x.isdigit(), numbers_of_files)) or not numbers_of_files:
+        print("Wrong format")
+        return delete_input_check()
+    else:
+        return numbers_of_files
 
 
 parser = argparse.ArgumentParser()
@@ -82,7 +98,7 @@ else:
 
     files_with_hash_value = {}
 
-    if check_for_duplicates():
+    if choose_yes_or_no("yes", "no", msg_duplicates):
         for _ in sorted(same_size_files.keys(), reverse=direction_of_sorted):
             files_with_hash_value[_] = files_with_hash_value.get(_, {})
             for file in same_size_files[_]:
@@ -92,12 +108,27 @@ else:
     duplicates = {size: {h: p for h, p in hash_and_path.items() if len(p) > 1} for size, hash_and_path in files_with_hash_value.items()}
 
     count = 1
-
     for byte in sorted(duplicates.keys(), reverse=direction_of_sorted):
         print(str(byte) + " bytes")
         for h_value in duplicates[byte]:
             print("Hash: " + h_value)
-            for file in duplicates[byte][h_value]:
-                print(str(count) + ". " + file, sep="\n")
+            for i in range(len(duplicates[byte][h_value])):
+                duplicates[byte][h_value][i] = (str(count), duplicates[byte][h_value][i])
+                print(*duplicates[byte][h_value][i], sep=". ")
                 count += 1
         print()
+
+    if choose_yes_or_no("yes", "no", msg_delete_files):
+        files_to_delete = set(delete_input_check())
+
+        deleted_files_size = 0
+        for bite in duplicates.keys():
+            for h_and_path in duplicates[bite]:
+                for f in range(len(duplicates[bite][h_and_path])):
+                    file_number, path = duplicates[bite][h_and_path][f]
+                    # print(file_number, p)
+                    if file_number in files_to_delete:
+                        deleted_files_size += bite
+                        os.remove(path)
+
+        print("Total freed up space:", deleted_files_size)
